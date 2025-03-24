@@ -38,3 +38,7 @@ class ContactService:
 
     async def get_contacts_birthday_in_7_days(self, user: User):
         return await self.repository.get_contacts_birthday_in_7_days(user)
+
+
+    async def get_contact_by_email(self, email: str):
+        return await self.repository.get_contact_by_email(email)

@@ -85,3 +85,11 @@ class ContactRepository:
 
         result = await self.db.execute(stmt)
         return result.scalars().all()
+
+
+    async def get_contact_by_email(self, email: str) -> User | None:
+        stmt = select(Contact).filter_by(email=email)
+        contact = await self.db.execute(stmt)
+        return contact.scalar_one_or_none()
+
+

@@ -15,6 +15,11 @@ router = APIRouter(prefix="/contacts", tags=["contacts"])
 @router.post("/", response_model=ContactResponse, status_code=status.HTTP_201_CREATED)
 async def create_contact(body: ContactCreate, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
     contact_service = ContactService(db)
+    existedContact = await contact_service.get_contact_by_email(body.email)
+    if existedContact:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=f"Contact with email={body.email} already exists"
+        )
     return await contact_service.create_contact(body, user)
 
 # Отримати список всіх контактів
@@ -53,6 +58,15 @@ async def read_contact(contact_id: int, db: AsyncSession = Depends(get_db), user
 @router.patch("/{contact_id}", response_model=ContactResponse)
 async def update_contact(body: ContactUpdate, contact_id: int, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
     contact_service = ContactService(db)
+
+    if body.email:
+        existedContact = await contact_service.get_contact_by_email(body.email)
+        if existedContact:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail=f"Contact with email={body.email} already exists"
+            )
+
+
     contact = await contact_service.update_contact(contact_id, body, user)
     if contact is None:
         raise HTTPException(
