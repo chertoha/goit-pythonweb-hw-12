@@ -12,3 +12,11 @@ python -m unittest discover test_directory
 
 Запуск тестів у verbose режимі, це коли тести виводяться з детальним виведенням:
 python -m unittest -v test_file.py
+
+
+Після інсталяції pytest-cov ви можете запускати тести та збирати дані про покриття, використовуючи таку команду:
+pytest --cov=src tests/
+
+
+HTML-звіт — для більш зручного перегляду результатів через браузер. Команда для генерації HTML-звіту:
+pytest --cov=src tests/ --cov-report=html

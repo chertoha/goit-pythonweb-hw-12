@@ -71,3 +71,22 @@ def test_validation_error_login(client):
     data = response.json()
     assert "detail" in data
 
+
+
+@pytest.mark.asyncio
+async def test_request_email_confirmed(client):
+    email_data = {"email": "agent007@gmail.com"}
+
+
+    async with TestingSessionLocal() as session:
+        user = await session.execute(select(User).where(User.email == email_data["email"]))
+        user = user.scalar_one_or_none()
+        if user:
+            user.confirmed = True
+            await session.commit()
+
+    response = client.post("api/auth/request_email", json=email_data)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["message"] == "Ваша електронна пошта вже підтверджена"
+
