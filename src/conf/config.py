@@ -28,6 +28,7 @@ from pydantic import ConfigDict, EmailStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+
 class Settings(BaseSettings):
     DB_URL: str = "postgresql+asyncpg://user:pass@localhost:5432/db_name"
     JWT_SECRET: str ="super_secret_key"
@@ -46,15 +47,17 @@ class Settings(BaseSettings):
     VALIDATE_CERTS: bool = True
 
     CLD_NAME: str = "caludinary_name"
-    CLD_API_KEY: int = 45465465465465
+    CLD_API_KEY: str = "45465465465465"
     CLD_API_SECRET: str = "some_secret"
 
-    model_config = SettingsConfigDict(
+
+    model_config = ConfigDict(
         extra="ignore",
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=True
     )
+
 
 
 settings = Settings()
