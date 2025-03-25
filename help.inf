@@ -1,1 +1,14 @@
 docker run --name fastapi_hw08 -p 5432:5432 -e POSTGRES_PASSWORD=root -d postgres
+
+
+Запуск усіх тестів у файлі:
+python -m unittest test_file.py
+
+Запуск конкретного тесту у файлі з тестами:
+python -m unittest test_file.TestClass.test_method
+
+Запуск усіх тестів у директорії:
+python -m unittest discover test_directory
+
+Запуск тестів у verbose режимі, це коли тести виводяться з детальним виведенням:
+python -m unittest -v test_file.py
