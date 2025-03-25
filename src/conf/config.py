@@ -29,25 +29,25 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    DB_URL: str
-    JWT_SECRET: str
+    DB_URL: str = "postgresql+asyncpg://user:pass@localhost:5432/db_name"
+    JWT_SECRET: str ="super_secret_key"
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRATION_SECONDS: int = 3600
 
-    MAIL_USERNAME: EmailStr
-    MAIL_PASSWORD: str
-    MAIL_FROM: EmailStr
-    MAIL_PORT: int
-    MAIL_SERVER: str
+    MAIL_USERNAME: EmailStr = "example@gmail.com"
+    MAIL_PASSWORD: str = "some_password"
+    MAIL_FROM: EmailStr ="example@gmail.com"
+    MAIL_PORT: int = 465
+    MAIL_SERVER: str = "smtp.meta.ua"
     MAIL_FROM_NAME: str = "Rest API Chertok Service"
     MAIL_STARTTLS: bool = False
     MAIL_SSL_TLS: bool = True
     USE_CREDENTIALS: bool = True
     VALIDATE_CERTS: bool = True
 
-    CLD_NAME: str
-    CLD_API_KEY: int
-    CLD_API_SECRET: str
+    CLD_NAME: str = "caludinary_name"
+    CLD_API_KEY: int = 45465465465465
+    CLD_API_SECRET: str = "some_secret"
 
     model_config = SettingsConfigDict(
         extra="ignore",

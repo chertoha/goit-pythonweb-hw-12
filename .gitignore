@@ -2,3 +2,9 @@
 .idea
 .venv
 *__pycache__
+
+#docs/_build/html
+#docs/_static/
+#docs/_sources/
+/docs/_build
+
