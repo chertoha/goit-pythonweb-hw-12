@@ -1,3 +1,14 @@
+"""
+SQLAlchemy database models module.
+
+This module defines the database models used in the application, including the `User` and `Contact` models
+for handling user and contact data in the database.
+
+Classes:
+    - Contact: SQLAlchemy model representing a user's contact.
+    - User: SQLAlchemy model representing a user.
+"""
+
 from sqlalchemy import Column, Integer, String, Date, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -7,6 +18,20 @@ from sqlalchemy.sql.sqltypes import DateTime, Boolean
 Base = declarative_base()
 
 class Contact(Base):
+    """
+        SQLAlchemy model representing a user's contact.
+
+        Attributes:
+            id (int): Unique identifier for the contact.
+            first_name (str): First name of the contact.
+            last_name (str): Last name of the contact.
+            email (str): Email address of the contact.
+            phone (str): Phone number of the contact.
+            birth_date (Date): Birth date of the contact.
+            additional_data (str | None): Additional data for the contact (optional).
+            user_id (int | None): Foreign key to the associated user.
+            user (User): Relationship to the associated user.
+    """
     __tablename__ = "contacts"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -21,6 +46,18 @@ class Contact(Base):
 
 
 class User(Base):
+    """
+        SQLAlchemy model representing a user.
+
+        Attributes:
+            id (int): Unique identifier for the user.
+            username (str): Username of the user.
+            email (str): Email address of the user.
+            hashed_password (str): The hashed password for the user.
+            created_at (DateTime): Timestamp of when the user was created.
+            avatar (str | None): URL of the user's avatar image.
+            confirmed (bool): Flag indicating whether the user's email has been confirmed.
+    """
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
     username = Column(String, unique=True)

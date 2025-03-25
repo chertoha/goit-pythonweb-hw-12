@@ -1,3 +1,17 @@
+"""
+Module for handling email-related services.
+
+This module provides functionalities related to sending emails, such as
+sending a confirmation email for email verification. It uses the FastAPI Mail
+package for sending emails asynchronously. The module also includes a utility
+to generate email verification tokens.
+
+Functions:
+    - send_email: Sends a confirmation email with a verification token to the user's email address.
+    - create_email_token: Generates a JWT token for email verification.
+    - get_email_from_token: Decodes an email verification token to retrieve the email address.
+"""
+
 from pathlib import Path
 
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
@@ -22,7 +36,22 @@ conf = ConnectionConfig(
 )
 
 async def send_email(email: EmailStr, username: str, host: str):
+    """
+        Sends an email with a verification link to the provided email address.
+
+        This function generates a JWT token for email verification and sends an
+        email with a confirmation link to the user's email address using FastAPI Mail.
+
+        Args:
+            email (EmailStr): The recipient's email address.
+            username (str): The recipient's username.
+            host (str): The host domain where the verification link should point to.
+
+        Raises:
+            ConnectionErrors: If there is an issue with the email connection.
+    """
     try:
+        # Generate an email verification token
         token_verification = create_email_token({"sub": email})
         message = MessageSchema(
             subject="Confirm your email",
@@ -35,6 +64,7 @@ async def send_email(email: EmailStr, username: str, host: str):
             subtype=MessageType.html,
         )
 
+        # Send the email message
         fm = FastMail(conf)
         await fm.send_message(message, template_name="verify_email.html")
     except ConnectionErrors as err:
