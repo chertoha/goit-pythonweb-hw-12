@@ -51,7 +51,9 @@ class Settings(BaseSettings):
     CLD_API_KEY: str = "45465465465465"
     CLD_API_SECRET: str = "some_secret"
 
-    REDIS_URL: str = "redis://localhost:6379"
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+
 
     model_config = ConfigDict(
         extra="ignore",

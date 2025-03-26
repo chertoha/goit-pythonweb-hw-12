@@ -76,6 +76,7 @@ async def login_user(
         Args:
             form_data (OAuth2PasswordRequestForm): The login credentials.
             db (Session): The database session.
+            redis (redis.Redis): The Redis cache.
 
         Returns:
             Token: The access token.
