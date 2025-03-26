@@ -103,6 +103,7 @@ async def login_user(
         "email": user.email,
         "confirmed": user.confirmed,
         "avatar": user.avatar,
+        "role": user.role
     }
 
     await redis.set(f"user:{user.username}", json.dumps(user_data))

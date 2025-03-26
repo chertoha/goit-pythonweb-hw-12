@@ -8,8 +8,9 @@ Classes:
     - Contact: SQLAlchemy model representing a user's contact.
     - User: SQLAlchemy model representing a user.
 """
+from enum import Enum
 
-from sqlalchemy import Column, Integer, String, Date, func
+from sqlalchemy import Column, Integer, String, Date, func, Enum as SqlEnum
 # from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import ForeignKey, PrimaryKeyConstraint, UniqueConstraint
@@ -46,6 +47,10 @@ class Contact(Base):
     user = relationship("User", backref="contacts")
 
 
+class UserRole(str, Enum):
+    USER = "USER"
+    ADMIN = "ADMIN"
+
 class User(Base):
     """
         SQLAlchemy model representing a user.
@@ -67,3 +72,6 @@ class User(Base):
     created_at = Column(DateTime, default=func.now())
     avatar = Column(String(255), nullable=True)
     confirmed = Column(Boolean, default=False)
+    role = Column(SqlEnum(UserRole), default=UserRole.USER, nullable=False)
+
+

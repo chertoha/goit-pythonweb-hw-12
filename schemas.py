@@ -19,6 +19,8 @@ from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel, Field, EmailStr, condecimal, constr, ConfigDict
 
+from src.database.models import UserRole
+
 
 class ContactBase(BaseModel):
     """
@@ -104,6 +106,7 @@ class User(BaseModel):
     username: str
     email: EmailStr = Field(..., max_length=100)
     avatar: str
+    role: UserRole
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -120,6 +123,7 @@ class UserCreate(BaseModel):
     username: str
     email: EmailStr = Field(..., max_length=100)
     password: str
+    role: UserRole
 
 # Схема для токену
 class Token(BaseModel):

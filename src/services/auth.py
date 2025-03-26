@@ -31,7 +31,8 @@ from src.conf.config import settings
 import json
 import redis.asyncio as redis
 from src.database.redis import get_redis
-from src.database.models import User
+from src.database.models import User, UserRole
+
 
 class Hash:
     """
@@ -159,6 +160,7 @@ async def get_current_user(
         "email": user.email,
         "confirmed": user.confirmed,
         "avatar": user.avatar,
+        "role": user.role
     }
     await redis.set(f"user:{username}", json.dumps(user_data))
     await redis.expire(f"user:{username}", 3600)
@@ -214,3 +216,9 @@ async def get_email_from_token(token: str):
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Неправильний токен для перевірки електронної пошти",
         )
+
+
+def get_current_admin_user(current_user: User = Depends(get_current_user)):
+    if current_user.role not in [UserRole.ADMIN]:
+        raise HTTPException(status_code=403, detail="Недостатньо прав доступу")
+    return current_user
