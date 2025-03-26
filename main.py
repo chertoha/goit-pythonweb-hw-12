@@ -14,8 +14,29 @@ from slowapi.errors import RateLimitExceeded
 from src.api import contacts, utils, auth, users
 from starlette.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+# from src.database.redis import init_redis, close_redis
+from contextlib import asynccontextmanager
 
+
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     await init_redis()
+#     yield
+#     await close_redis()
+
+
+# app = FastAPI(lifespan=lifespan)
 app = FastAPI()
+
+
+
+# @app.on_event("startup")
+# async def startup():
+#     await init_redis()
+#
+# @app.on_event("shutdown")
+# async def shutdown():
+#     await close_redis()
 
 origins = [
     "http://localhost:8000"

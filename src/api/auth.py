@@ -20,6 +20,9 @@ from src.services.auth import create_access_token, Hash, get_email_from_token
 from src.services.users import UserService
 from src.database.db import get_db
 from src.services.email import send_email
+from src.database.redis import get_redis
+import json
+import redis.asyncio as redis
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -65,7 +68,7 @@ async def register_user(user_data: UserCreate, background_tasks: BackgroundTasks
 
 @router.post("/login", response_model=Token)
 async def login_user(
-    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
+    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db), redis: redis.Redis = Depends(get_redis)
 ):
     """
         Authenticates a user and returns an access token.
@@ -92,6 +95,18 @@ async def login_user(
         )
 
     access_token = await create_access_token(data={"sub": user.username})
+
+    user_data = {
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "confirmed": user.confirmed,
+        "avatar": user.avatar,
+    }
+
+    await redis.set(f"user:{user.username}", json.dumps(user_data))
+    await redis.expire(f"user:{user.username}", 3600)
+
     return {"access_token": access_token, "token_type": "bearer"}
 
 

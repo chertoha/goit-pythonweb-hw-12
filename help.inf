@@ -20,3 +20,8 @@ pytest --cov=src tests/
 
 HTML-звіт — для більш зручного перегляду результатів через браузер. Команда для генерації HTML-звіту:
 pytest --cov=src tests/ --cov-report=html
+
+
+
+Redis container
+docker run --name redis-cache -d -p 6379:6379 redis

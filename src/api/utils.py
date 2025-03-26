@@ -28,7 +28,6 @@ async def healthchecker(db: AsyncSession = Depends(get_db)):
             dict: A success message if the database is connected, or an error if not.
     """
     try:
-        # Виконуємо асинхронний запит
         result = await db.execute(text("SELECT 1"))
         result = result.scalar_one_or_none()
 

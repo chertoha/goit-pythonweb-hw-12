@@ -28,6 +28,10 @@ from jose import JWTError, jwt
 from src.database.db import get_db
 from src.services.users import UserService
 from src.conf.config import settings
+import json
+import redis.asyncio as redis
+from src.database.redis import get_redis
+from src.database.models import User
 
 class Hash:
     """
@@ -100,7 +104,7 @@ async def create_access_token(data: dict, expires_delta: Optional[int] = None):
     return encoded_jwt
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db), redis: redis.Redis = Depends(get_redis)
 ):
     """
         Retrieves the currently authenticated user by decoding the JWT token.
@@ -136,10 +140,29 @@ async def get_current_user(
             raise credentials_exception
     except JWTError as e:
         raise credentials_exception
+
+
+    cached_user = await redis.get(f"user:{username}")
+    if cached_user:
+        user_data = json.loads(cached_user.decode("utf-8"))
+        return User(**user_data)
+
     user_service = UserService(db)
     user = await user_service.get_user_by_username(username)
+
     if user is None:
         raise credentials_exception
+
+    user_data = {
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "confirmed": user.confirmed,
+        "avatar": user.avatar,
+    }
+    await redis.set(f"user:{username}", json.dumps(user_data))
+    await redis.expire(f"user:{username}", 3600)
+
     return user
 
 

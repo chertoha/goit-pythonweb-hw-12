@@ -22,6 +22,8 @@ from libgravatar import Gravatar
 
 from src.repository.users import UserRepository
 from schemas import UserCreate
+from src.database.models import User
+
 
 class UserService:
     """

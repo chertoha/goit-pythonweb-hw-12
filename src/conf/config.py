@@ -22,6 +22,7 @@ Attributes:
     CLD_NAME: Cloud service name for file storage.
     CLD_API_KEY: Cloud API key.
     CLD_API_SECRET: Cloud API secret.
+    REDIS_URL: Redis connection URL.
 """
 
 from pydantic import ConfigDict, EmailStr
@@ -50,6 +51,7 @@ class Settings(BaseSettings):
     CLD_API_KEY: str = "45465465465465"
     CLD_API_SECRET: str = "some_secret"
 
+    REDIS_URL: str = "redis://localhost:6379"
 
     model_config = ConfigDict(
         extra="ignore",

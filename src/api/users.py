@@ -29,7 +29,7 @@ limiter = Limiter(key_func=get_remote_address)
 
 
 @router.get("/me", response_model=User)
-@limiter.limit("3/minute")
+@limiter.limit("60/minute")
 async def me(request: Request, user: User = Depends(get_current_user)):
     """
         Retrieves the current authenticated user's profile information.
