@@ -134,3 +134,16 @@ class UserRepository:
         await self.db.commit()
         await self.db.refresh(user)
         return user
+
+    async def update_refresh_token(self, user_id: int, refresh_token: str) -> None:
+        """
+        Updates the refresh token for a user.
+
+        Args:
+            user_id (int): The ID of the user to update.
+            refresh_token (str): The new refresh token.
+        """
+        user = await self.get_user_by_id(user_id)
+        if user:
+            user.refresh_token = refresh_token
+            await self.db.commit()

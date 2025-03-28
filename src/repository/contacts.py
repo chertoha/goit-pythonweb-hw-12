@@ -40,7 +40,8 @@ class ContactRepository:
                 :return: List of Contact objects
         """
 
-        stmt = select(Contact).filter_by(user=user)
+        stmt = select(Contact).filter_by(user_id=user.id)
+        # stmt = select(Contact).filter_by(user=user)
 
         if search:
             search_filter = or_(
@@ -64,7 +65,8 @@ class ContactRepository:
                 :return: Contact object or None if not found
         """
 
-        stmt = select(Contact).filter_by(id=contact_id, user=user)
+        stmt = select(Contact).filter_by(id=contact_id, user_id=user.id)
+        # stmt = select(Contact).filter_by(id=contact_id, user=user)
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -77,7 +79,8 @@ class ContactRepository:
                 :return: Created Contact object
         """
 
-        contact = Contact(**body.model_dump(exclude_unset=True), user=user)
+        contact = Contact(**body.model_dump(exclude_unset=True), user_id=user.id)
+        # contact = Contact(**body.model_dump(exclude_unset=True), user=user)
         self.db.add(contact)
         await self.db.commit()
         await self.db.refresh(contact)
@@ -144,10 +147,15 @@ class ContactRepository:
         today = datetime.today()
         seven_days_later = today + timedelta(days=7)
 
-        stmt = select(Contact).filter_by(user=user).filter(
+        stmt = select(Contact).filter_by(user_id=user.id).filter(
             Contact.birth_date >= today,
             Contact.birth_date <= seven_days_later
         ).order_by(Contact.birth_date)
+
+        # stmt = select(Contact).filter_by(user=user).filter(
+        #     Contact.birth_date >= today,
+        #     Contact.birth_date <= seven_days_later
+        # ).order_by(Contact.birth_date)
 
         result = await self.db.execute(stmt)
         return result.scalars().all()

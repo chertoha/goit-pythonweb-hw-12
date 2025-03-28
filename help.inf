@@ -24,4 +24,9 @@ pytest --cov=src tests/ --cov-report=html
 
 
 Redis container
-docker run --name redis-cache -d -p 6379:6379 redis
+docker run --name redis-cache -d -p 6379:6379 redi
+
+
+
+alembic revision --autogenerate -m 'Init'
+alembic upgrade head

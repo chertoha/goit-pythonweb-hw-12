@@ -15,7 +15,7 @@ Functions:
 Classes:
     - Hash: Provides methods to hash passwords and verify password hashes.
 """
-
+import logging
 from datetime import datetime, timedelta, UTC
 from typing import Optional
 
@@ -33,6 +33,10 @@ import redis.asyncio as redis
 from src.database.redis import get_redis
 from src.database.models import User, UserRole
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
+
+logging.basicConfig(level=logging.INFO)
 
 class Hash:
     """
@@ -98,11 +102,104 @@ async def create_access_token(data: dict, expires_delta: Optional[int] = None):
         expire = datetime.now(UTC) + timedelta(seconds=expires_delta)
     else:
         expire = datetime.now(UTC) + timedelta(seconds=settings.JWT_EXPIRATION_SECONDS)
-    to_encode.update({"exp": expire})
+    to_encode.update({"exp": expire, "token_type": "access"})
     encoded_jwt = jwt.encode(
         to_encode, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM
     )
     return encoded_jwt
+
+
+
+async def create_refresh_token(data: dict, expires_delta: Optional[int] = None):
+    """
+       Creates a new refresh token (JWT) for the user.
+
+       Args:
+           data (dict): The data (user information) to encode in the token.
+           expires_delta (Optional[int], optional): The expiration time in seconds. Defaults to None.
+
+       Returns:
+           str: The generated JWT refresh token.
+    """
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.now(UTC) + timedelta(seconds=expires_delta)
+    else:
+        expire = datetime.now(UTC) + timedelta(days=7)
+    to_encode.update({"exp": expire, "token_type": "refresh"})
+
+    encoded_jwt = jwt.encode(
+        to_encode, settings.JWT_REFRESH_SECRET, algorithm=settings.JWT_ALGORITHM
+    )
+    return encoded_jwt
+
+
+
+
+async def verify_refresh_token(refresh_token: str, db: Session = Depends(get_db)):
+    """
+        Validates the given refresh token and returns the user if valid.
+
+        Args:
+            refresh_token (str): The refresh token.
+            db (Session): The database session.
+
+        Returns:
+            User: The user associated with the refresh token or None if invalid.
+    """
+    try:
+        payload = jwt.decode(
+            refresh_token, settings.JWT_REFRESH_SECRET, algorithms=[settings.JWT_ALGORITHM]
+        )
+        username: str = payload.get("sub")
+        token_type: str = payload.get("token_type")
+
+        if username is None or token_type != "refresh":
+            return None
+
+        user_service = UserService(db)
+        user = await user_service.get_user_by_username(username)
+
+        if refresh_token != user.refresh_token:
+            return None
+
+        # user = await db.query(User).filter(User.username == username, User.refresh_token == refresh_token).first()
+
+        return user
+    except JWTError:
+        return None
+
+
+#
+# async def create_refresh_token(data: dict, expires_delta: Optional[int] = None):
+#
+#     to_encode = data.copy()
+#     if expires_delta:
+#         expire = datetime.now(UTC) + timedelta(seconds=expires_delta)
+#     else:
+#         expire = datetime.now(UTC) + timedelta(seconds=3600)
+#     to_encode.update({"exp": expire, "token_type": "refresh"})
+#     encoded_jwt = jwt.encode(
+#         to_encode, settings.JWT_REFRESH_SECRET, algorithm=settings.JWT_ALGORITHM
+#     )
+#     return encoded_jwt
+#
+#
+# def verify_refresh_token(refresh_token: str, db: Session):
+#     try:
+#         payload = jwt.decode(refresh_token, settings.JWT_REFRESH_SECRET, algorithms=[settings.JWT_ALGORITHM])
+#         username: str = payload.get("sub")
+#         token_type: str = payload.get("token_type")
+#         if username is None or token_type != "refresh":
+#             return None
+#         user = (
+#             db.query(User)
+#             .filter(User.username == username, User.refresh_token == refresh_token)
+#             .first()
+#         )
+#         return user
+#     except JWTError:
+#         return None
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme), db: Session = Depends(get_db), redis: redis.Redis = Depends(get_redis)
