@@ -164,6 +164,9 @@ async def verify_refresh_token(refresh_token: str, db: Session = Depends(get_db)
         user_service = UserService(db)
         user = await user_service.get_user_by_username(username)
 
+        logging.info(f"verify_refresh_token: user.refresh_token={user.refresh_token}")
+        logging.info(f"verify_refresh_token: refresh_token={refresh_token}")
+
         if refresh_token != user.refresh_token:
             return None
 
