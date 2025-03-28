@@ -7,6 +7,7 @@ and provides access to various application settings, including database, JWT, em
 Attributes:
     DB_URL: Database connection URL.
     JWT_SECRET: JWT secret key for signing tokens.
+    JWT_REFRESH_SECRET: JWT secret key for signing tokens.
     JWT_ALGORITHM: JWT signing algorithm (default: "HS256").
     JWT_EXPIRATION_SECONDS: JWT expiration time in seconds (default: 3600).
     MAIL_USERNAME: Email server username for sending emails.
@@ -34,7 +35,9 @@ class Settings(BaseSettings):
     DB_URL: str = "postgresql+asyncpg://user:pass@localhost:5432/db_name"
     JWT_SECRET: str ="super_secret_key"
     JWT_ALGORITHM: str = "HS256"
-    JWT_EXPIRATION_SECONDS: int = 3600
+    JWT_EXPIRATION_SECONDS: int = 60
+
+    JWT_REFRESH_SECRET:str = "super_secret_refresh_key"
 
     MAIL_USERNAME: EmailStr = "example@gmail.com"
     MAIL_PASSWORD: str = "some_password"

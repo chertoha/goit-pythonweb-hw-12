@@ -131,3 +131,5 @@ class UserService:
         """
         return await self.repository.update_avatar_url(email, url)
 
+    async def update_refresh_token(self, user_id: int, refresh_token: str) -> None:
+        await self.repository.update_refresh_token(user_id, refresh_token)

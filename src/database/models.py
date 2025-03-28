@@ -65,6 +65,7 @@ class User(Base):
             confirmed (bool): Flag indicating whether the user's email has been confirmed.
     """
     __tablename__ = "users"
+
     id = Column(Integer, primary_key=True)
     username = Column(String, unique=True)
     email = Column(String, unique=True)
@@ -73,5 +74,6 @@ class User(Base):
     avatar = Column(String(255), nullable=True)
     confirmed = Column(Boolean, default=False)
     role = Column(SqlEnum(UserRole), default=UserRole.USER, nullable=False)
+    refresh_token = Column(String(255), nullable=True)
 
 

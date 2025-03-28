@@ -19,7 +19,7 @@ def user_repository(mock_session):
 
 @pytest.fixture
 def user():
-    return User(id=1, username="testuser", email="test@example.com", confirmed=False)
+    return User(id=1, username="testuser", email="test@example.com", confirmed=False, role="ADMIN")
 
 
 @pytest.mark.asyncio
@@ -77,7 +77,8 @@ async def test_create_user(user_repository, mock_session):
     user_data = UserCreate(
         username="newuser",
         email="new@example.com",
-        password="securepassword"
+        password="securepassword",
+        role="ADMIN"
     )
 
     # Call method
@@ -98,7 +99,7 @@ async def test_confirmed_email():
     mock_session = AsyncMock()
     repo = UserRepository(mock_session)
 
-    mock_user = User(email="test@example.com", confirmed=False)
+    mock_user = User(email="test@example.com", confirmed=False, role="ADMIN")
     repo.get_user_by_email = AsyncMock(return_value=mock_user)
 
     await repo.confirmed_email("test@example.com")
@@ -112,7 +113,7 @@ async def test_update_avatar_url():
     mock_session = AsyncMock()
     repo = UserRepository(mock_session)
 
-    mock_user = User(email="test@example.com", avatar="old_url")
+    mock_user = User(email="test@example.com", avatar="old_url", role="ADMIN")
     repo.get_user_by_email = AsyncMock(return_value=mock_user)
 
     updated_user = await repo.update_avatar_url("test@example.com", "new_url")

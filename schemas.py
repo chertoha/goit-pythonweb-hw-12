@@ -135,6 +135,7 @@ class Token(BaseModel):
             token_type (str): The type of the token (usually "bearer").
     """
     access_token: str
+    refresh_token: str
     token_type: str
 
 

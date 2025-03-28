@@ -86,8 +86,11 @@ async def test_get_current_user_invalid_token(mock_db):
 async def test_get_current_user_user_not_found(mock_db):
     token = await create_access_token(data={"sub": "nonexistentuser"})
 
+    mock_redis = AsyncMock()
+    mock_redis.get.return_value = None
+
     with patch.object(UserService, "get_user_by_username", new_callable=AsyncMock) as mock_get_user:
         mock_get_user.return_value = None
 
         with pytest.raises(HTTPException):
-            await get_current_user(token=token, db=mock_db)
+            await get_current_user(token=token, db=mock_db, redis=mock_redis)
