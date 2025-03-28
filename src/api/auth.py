@@ -14,7 +14,6 @@ Endpoints:
 import logging
 from fastapi import APIRouter, Depends, HTTPException, status, Security, BackgroundTasks, Request
 from sqlalchemy.orm import Session
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from fastapi.security import OAuth2PasswordRequestForm
 from schemas import UserCreate, Token, User, RequestEmail
@@ -26,6 +25,8 @@ from src.services.email import send_email
 from src.database.redis import get_redis
 import json
 import redis.asyncio as redis
+from fastapi.security import OAuth2PasswordBearer
+
 
 logging.basicConfig(level=logging.INFO)
 
@@ -61,6 +62,7 @@ async def register_user(user_data: UserCreate, background_tasks: BackgroundTasks
             status_code=status.HTTP_409_CONFLICT,
             detail="Користувач з таким іменем вже існує",
         )
+
     user_data.password = Hash().get_password_hash(user_data.password)
     new_user = await user_service.create_user(user_data)
 
@@ -102,9 +104,6 @@ async def login_user(
 
     access_token = await create_access_token(data={"sub": user.username})
     refresh_token = await create_refresh_token(data={"sub": user.username})
-    # user.refresh_token = refresh_token
-    # db.commit()
-
 
     user_data = {
         "id": user.id,
@@ -113,16 +112,15 @@ async def login_user(
         "confirmed": user.confirmed,
         "avatar": user.avatar,
         "role": user.role,
-        # "refresh_token": user.refresh_token
+        "refresh_token": user.refresh_token
     }
 
     await redis.set(f"user:{user.username}", json.dumps(user_data))
     await redis.expire(f"user:{user.username}", 3600)
 
-    # await user_service.update_refresh_token(user.id, refresh_token)
+    await user_service.update_refresh_token(user.id, refresh_token)
 
     return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
-    # return {"test": "test"}
 
 
 @router.get("/confirmed_email/{token}")
@@ -186,10 +184,11 @@ async def request_email(
     return {"message": "Перевірте свою електронну пошту для підтвердження"}
 
 
+refresh_token_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/refresh")
+
 @router.post("/refresh", response_model=Token)
-async def refresh(
-    refresh_token: str, db: Session = Depends(get_db)
-):
+async def refresh(refresh_token: str = Depends(refresh_token_scheme), db: Session = Depends(get_db)):
+    print(f"==/refresh===================={refresh_token}========================")
     """
         Refreshes the access token using a valid refresh token.
 
@@ -204,6 +203,7 @@ async def refresh(
             dict: A new access token and refresh token.
     """
     user = await verify_refresh_token(refresh_token, db)
+    print(f"======================{user}========================")
 
     if not user:
         raise HTTPException(
@@ -218,7 +218,5 @@ async def refresh(
 
     user_service = UserService(db)
     await user_service.update_refresh_token(user.id, refresh_token)
-    # user.refresh_token = new_refresh_token
-    # db.commit()
 
     return {"access_token": access_token, "refresh_token": new_refresh_token, "token_type": "bearer"}

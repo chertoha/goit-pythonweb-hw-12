@@ -33,7 +33,6 @@ import redis.asyncio as redis
 from src.database.redis import get_redis
 from src.database.models import User, UserRole
 
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 logging.basicConfig(level=logging.INFO)
@@ -128,9 +127,12 @@ async def create_refresh_token(data: dict, expires_delta: Optional[int] = None):
         expire = datetime.now(UTC) + timedelta(days=7)
     to_encode.update({"exp": expire, "token_type": "refresh"})
 
+
+
     encoded_jwt = jwt.encode(
         to_encode, settings.JWT_REFRESH_SECRET, algorithm=settings.JWT_ALGORITHM
     )
+
     return encoded_jwt
 
 
@@ -151,8 +153,10 @@ async def verify_refresh_token(refresh_token: str, db: Session = Depends(get_db)
         payload = jwt.decode(
             refresh_token, settings.JWT_REFRESH_SECRET, algorithms=[settings.JWT_ALGORITHM]
         )
+
         username: str = payload.get("sub")
         token_type: str = payload.get("token_type")
+
 
         if username is None or token_type != "refresh":
             return None
@@ -163,43 +167,12 @@ async def verify_refresh_token(refresh_token: str, db: Session = Depends(get_db)
         if refresh_token != user.refresh_token:
             return None
 
-        # user = await db.query(User).filter(User.username == username, User.refresh_token == refresh_token).first()
 
         return user
-    except JWTError:
+    except JWTError as err:
+        print(f"======JWTError================{err}========================")
         return None
 
-
-#
-# async def create_refresh_token(data: dict, expires_delta: Optional[int] = None):
-#
-#     to_encode = data.copy()
-#     if expires_delta:
-#         expire = datetime.now(UTC) + timedelta(seconds=expires_delta)
-#     else:
-#         expire = datetime.now(UTC) + timedelta(seconds=3600)
-#     to_encode.update({"exp": expire, "token_type": "refresh"})
-#     encoded_jwt = jwt.encode(
-#         to_encode, settings.JWT_REFRESH_SECRET, algorithm=settings.JWT_ALGORITHM
-#     )
-#     return encoded_jwt
-#
-#
-# def verify_refresh_token(refresh_token: str, db: Session):
-#     try:
-#         payload = jwt.decode(refresh_token, settings.JWT_REFRESH_SECRET, algorithms=[settings.JWT_ALGORITHM])
-#         username: str = payload.get("sub")
-#         token_type: str = payload.get("token_type")
-#         if username is None or token_type != "refresh":
-#             return None
-#         user = (
-#             db.query(User)
-#             .filter(User.username == username, User.refresh_token == refresh_token)
-#             .first()
-#         )
-#         return user
-#     except JWTError:
-#         return None
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme), db: Session = Depends(get_db), redis: redis.Redis = Depends(get_redis)
